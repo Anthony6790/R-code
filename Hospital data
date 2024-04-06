@@ -1,0 +1,235 @@
+library(dplyr)
+library(ggplot2)
+hosp=read.csv("hospitals.csv")
+dim(hosp)
+colnames(hosp)
+str(hosp)
+
+
+#e) Which hospital has the lowest number of beds?
+
+minrow <- hosp %>%
+  filter(Beds == min(Beds)) 
+#hospital 1064 & 1751
+
+#f) Which hospital has the lowest expense?
+
+minrow2 <- hosp %>%
+  filter(Total.Expense == min(Total.Expense))
+#hospital 826  
+
+#g) How many hospitals deliver babies?
+  
+Babies <-  hosp %>%
+  filter(Births.or.Not == max(Births.or.Not)) 
+#1,112 hospitals  
+
+#h) Using ggplot, scatterplot number of beds vs Total Expense
+
+ggplot(hosp, aes(Beds, Total.Expense))+ 
+  geom_point() 
+
+#i) Using ggplot, scatterplot Admissions vs Total Expense
+
+ggplot(hosp, aes(Admissions, Total.Expense))+ 
+  geom_point() 
+
+#j) Using dplyr and ggplot, scatterplot beds vs Total Expense
+#but only for hospitals that deliver babies
+
+ggplot(Babies, aes(Beds, Total.Expense))+ 
+  geom_point() 
+
+
+k) One more question that you believe would be useful.
+
+
+
+
+
+i. For Pie Chart: One slice should be labeled Admissions.
+Choose another attribute for the second slice.
+
+max(hosp$Beds)
+library(dplyr)
+library(ggplot2)
+
+
+hlibrary(dplyr)
+library(ggplot2)
+
+# Create two separate variables for beds < 100 and beds >= 100, including outpatient visits
+hosp <- hosp %>%
+  mutate(Beds_Less_100 = ifelse(Beds < 100, Admissions + Outpatient.Visits, 0),
+         Beds_Greater_100 = ifelse(Beds >= 100, Admissions + Outpatient.Visits, 0))
+
+# Sum up admissions and outpatient visits for each category
+summary_data <- hosp %>%
+  summarize(Total_Beds_Less_100 = sum(Beds_Less_100),
+            Total_Beds_Greater_100 = sum(Beds_Greater_100))
+
+# Create a data frame for plotting
+plot_data <- data.frame(
+  Bed_Group = c("Beds < 100", "Beds >= 100"),
+  Admissions = c(summary_data$Total_Beds_Less_100, summary_data$Total_Beds_Greater_100)
+)
+
+# Create pie chart
+ggplot(plot_data, aes(x = "", y = Admissions, fill = Bed_Group)) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar(theta = "y") +
+  labs(title = "Admissions and Outpatient Visits Distribution by Bed Count",
+       fill = "Bed Count",
+       y = "Admissions and Outpatient Visits") +
+  theme_minimal() +
+  theme(legend.position = "right") +
+  guides(fill = guide_legend(title = "Bed Count"))
+
+max(hosp$Census)
+
+#PART 3
+
+#ii. For the column/bar charts: Ensure that one column is titled
+#Admissions. Choose a different attribute for the other
+#column.
+
+library(dplyr)
+library(ggplot2)
+
+# Create a new column to represent categories of admissions based on bed count
+hosp <- hosp %>%
+  mutate(Admissions_Category = ifelse(beds < 100, "Less than 100 beds", "100 or more beds"))
+
+# Summarize admissions by the new categories
+agg_data <- hosp %>%
+  group_by(Admissions_Category) %>%
+  summarize(Total_Admissions = sum(admissions))
+
+# Plot the bar chart
+ggplot(agg_data, aes(x = Admissions_Category, y = Total_Admissions)) +
+  geom_bar(stat = "identity", fill = "skyblue", alpha = 0.7) +
+  labs(x = "Admissions Category", y = "Total Admissions", title = "Total Admissions by Bed Count") +
+  theme_minimal()
+
+
+#iii. For Line Chart: one of the lines should represent Expense;
+#choose another attribute for the second line.
+
+
+# Aggregate admissions and expenses by beds
+agg_data <- hosp %>%
+  group_by(Beds) %>%
+  summarize(Total_Admissions = sum(Admissions),
+            Total_Expenses = sum(Total.Expense))
+
+# Plot the line chart
+ggplot(agg_data, aes(x = Beds)) +
+  geom_line(aes(y = Total_Admissions, color = "Admissions"), size = 1.5) +
+  geom_line(aes(y = Total_Expenses, color = "Expenses"), linetype = "dashed", size = 1.5) +
+  labs(x = "Beds", y = "Total Expenses", color = "Legend") +
+  scale_color_manual(values = c(Admissions = "blue", Expenses = "red"),
+                     labels = c(Admissions = "Admissions", Expenses = "Expenses")) +
+  theme_minimal() +
+  theme(axis.title.y.right = element_text(color = "blue"),
+        axis.text.y.right = element_text(color = "blue")) +
+  labs(y = "Total Admissions & Expense")
+
+
+
+
+#ii. The dependent variable should be Total Expense. Choose an
+#independent variable from one of the remaining attributes.
+
+ExpAD = lm(Total.Expense~Beds, hosp)
+summary(ExpAD)
+
+#iii. What is the value of the �!?
+
+#.60
+  
+#iv. What does the �! measure in this case? ( Hint: Percentage of
+#variation in … explained by …)
+
+#approximately 73% of the variance in Total.Expense is explained by Admissions.
+
+#v. What are the pvalues ? How many pvalues are reported, why ?
+
+#2.2e-16, 1 pvalue for one independent variable
+
+
+#  What does each pvalue mean? (Hint: pvalues have are related to generalizing from the sample to the population: what is the sample
+#                               here, what is the population?) (1-2 sentences)
+
+#The Pvalues represent the probability of observing the estimated coefficients or a more extreme value under the assumption of 
+#no relationship between the predictor and response variables in the population
+
+#vi. Explain R square, pvalues.
+
+#Pv: There is a direct correlation between the number of admission and the amount of expensises(less than .05)
+#R^2: There is significant explanation of variance in expense through admission
+
+#vii. What would be the right attribute size (independent variable) that
+#seems most appropriate to lead you in the expense range of $55–
+#$75 million?
+
+#If put into an equation around 50 thousand beds would cause you that 
+#kind of expense but realistically this is much less considering all the other 
+#expenses that will actually go into making a hospital.
+
+
+#ii. The dependent variable should be Total Expense. Choose an
+#independent variable from one of the remaining attributes.
+
+ExpAD = lm(Total.Expense~Beds+Personnel, hosp)
+summary(ExpAD)
+
+#iii. What is the value of the �!?
+
+#.91
+
+#iv. What does the �! measure in this case? ( Hint: Percentage of
+#variation in … explained by …)
+
+#approximately 91% of the variance in Total.Expense is explained by Admissions.
+
+#v. What are the pvalues ? How many pvalues are reported, why ?
+
+#2.2e-16,1.05e-11 2 pvalue for two independent variable
+
+
+#  What does each pvalue mean? (Hint: pvalues have are related to generalizing from the sample to the population: what is the sample
+#                               here, what is the population?) (1-2 sentences)
+
+
+
+#The Pvalues represent the probability of observing the estimated coefficients or a more extreme value under the assumption of 
+#no relationship between the predictor and response variables in the population
+
+
+
+#vi. Explain R square, pvalues.
+
+#Pv: There is a direct correlation between the number of beds and Personel
+#and the amount of expensises(less than .05)
+
+#R^2: There is significant explanation of variance in expense through admission and personel combined
+
+#vii. What would be the right attribute size (independent variable) that
+#seems most appropriate to lead you in the expense range of $55–
+#$75 million?
+
+#If put into an equation around 200,000 thousand beds and personell would cause you that 
+#kind of expense but realistically this is much less considering all the other 
+#expenses that will actually go into making a hospital.
+
+#5. Write bullet points explaining your results and why they support your
+#conclusion: option A or B?
+
+-#We should build a bigger hospital 
+  
+-#this is because, beds do not have  a huge impact on expense, admissions do
+  
+-#More bed also equals more admissions that lower the cost and raise profit margin
+  
+
+
